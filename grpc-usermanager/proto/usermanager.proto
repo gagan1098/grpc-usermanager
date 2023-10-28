@@ -1,0 +1,20 @@
+syntax="proto3";
+
+package proto;
+
+option go_package = "github.com/grpc-usermanager";
+
+message Input {
+   string user_id = 1;
+}
+
+message Output {
+   string name = 1;
+   string description = 2;
+   bool done = 3;
+   string user_id = 4;
+}
+
+service UsermanagerService {
+   rpc GetUser(Input) returns (Output) {}
+}
