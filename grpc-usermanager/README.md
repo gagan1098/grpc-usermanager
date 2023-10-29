@@ -40,3 +40,14 @@ GetUsers: accepts a struct with an array of Ids
 - Responses:
 GetUser: responds with UserDetails struct or error
 GetUsers: responds with array of UserDetails struct or error
+
+## Demo
+### Server
+![image1](https://github.com/gagan1098/grpc-usermanager/assets/90213440/b654840b-5120-4e63-bcd8-c214d941fe93)
+
+
+### Client
+
+![image](https://github.com/gagan1098/grpc-usermanager/assets/90213440/6b44b096-390b-4585-87b4-c24b335b8d40)
+
+
