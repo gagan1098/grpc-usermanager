@@ -14,50 +14,43 @@ const (
 	ADDRESS = "localhost:50051"
 )
 
-type UsermanagerTask struct {
-	Name        string
-	Description string
-	Done        bool
+type UserRequest struct {
+	Id int
 }
 
 func main() {
+	// create connection
 	conn, err := grpc.Dial(ADDRESS, grpc.WithInsecure(), grpc.WithBlock())
-
 	if err != nil {
 		log.Fatalf("did not connect : %v", err)
 	}
-
 	defer conn.Close()
 
-	c := pb.NewUsermanagerServiceClient(conn)
-
+	// create client
+	client := pb.NewUsermanagerServiceClient(conn)
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
-
 	defer cancel()
 
-	todos := []UsermanagerTask{
-		{Name: "Code review", Description: "Review new feature code", Done: false},
-		{Name: "Make YouTube Video", Description: "Start Go for beginners series", Done: false},
-		{Name: "Go to the gym", Description: "Leg day", Done: false},
-		{Name: "Buy groceries", Description: "Buy tomatoes, onions, mangos", Done: false},
-		{Name: "Meet with mentor", Description: "Discuss blockers in my project", Done: false},
+	users := []UserRequest{
+		{Id: 1},
+		{Id: 2},
+		{Id: 3},
 	}
 
-	for _, todo := range todos {
-		res, err := c.GetUser(ctx, &pb.Input{
-			UserId: todo.Name,
+	for _, user := range users {
+		res, err := client.GetUser(ctx, &pb.Input{
+			Id: int32(user.Id),
 		})
 
 		if err != nil {
-			log.Fatalf("could not create user: %v", err)
+			log.Fatalf("could not find user: %v", err)
 		}
 
 		log.Printf(`
-           ID : %s
-           Name : %s
-           Description : %s
-           Done : %v,
-       `, res.GetUserId(), res.GetName(), res.GetDescription(), res.GetDone())
+			id : %d
+			fname : %s
+			city : %s
+			phone : %v,
+		`, res.GetId(), res.GetFname(), res.GetCity(), res.GetPhone())
 	}
-
 }
