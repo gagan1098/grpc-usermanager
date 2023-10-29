@@ -56,11 +56,16 @@ func (server *UsermanagerServer) GetUser(ctx context.Context, input *pb.GetUserI
 }
 
 func (server *UsermanagerServer) GetUsers(ctx context.Context, input *pb.GetUsersInput) (*pb.Users, error) {
-	log.Printf("Received request for user ids: %v", input.GetIds())
+	ids := input.GetIds()
+	log.Printf("Received request for user ids: %v", ids)
 	var users []*pb.User
+	// validate input
+	if len(ids) == 0 {
+		return nil, http_error.Error(400, "bad request: ids not provided")
+	}
 	// traverse through ids passed in request
 	// and fetch user details from in-memory DB
-	for _, id := range input.GetIds() {
+	for _, id := range ids {
 		user, http_error := FetchUser(id)
 		if http_error == nil {
 			users = append(users, user)
@@ -77,11 +82,9 @@ func main() {
 		log.Fatalf("failed connection: %v", err)
 	}
 	server := grpc.NewServer()
-
 	// register usermanager service
 	pb.RegisterUsermanagerServiceServer(server, &UsermanagerServer{})
 	log.Printf("server listening at: %v", listener.Addr())
-
 	// log error, if any
 	if err := server.Serve(listener); err != nil {
 		log.Fatalf("failed to serve with error: %v", err)

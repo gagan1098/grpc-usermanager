@@ -58,6 +58,8 @@ func main() {
 	multiple_users := []MultipleUserRequest{
 		{Ids: []int32{1, 2}},
 		{Ids: []int32{1, 3}},
+		{Ids: []int32{}},
+		{Ids: nil},
 	}
 	for _, users := range multiple_users {
 		res, err := client.GetUsers(ctx, &pb.GetUsersInput{
