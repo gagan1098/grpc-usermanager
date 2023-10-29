@@ -32,13 +32,12 @@ var USER_MAP = map[int]*User{
 	2: {"Gagan", "New Delhi", 9876543210, 5.9, false},
 }
 
-func (s *UsermanagerServer) GetUser(ctx context.Context, input *pb.Input) (*pb.Output, error) {
-	log.Printf("Received request for user id: %v", input.GetId())
+func FetchUser(id int32) (*pb.User, error) {
 	// check if the user is present in in-memory DB
-	user, exists := USER_MAP[int(input.GetId())]
+	user, exists := USER_MAP[int(id)]
 	if exists {
-		user := &pb.Output{
-			Id:      input.GetId(),
+		user := &pb.User{
+			Id:      id,
 			Fname:   user.fname,
 			City:    user.city,
 			Phone:   user.phone,
@@ -48,8 +47,27 @@ func (s *UsermanagerServer) GetUser(ctx context.Context, input *pb.Input) (*pb.O
 		return user, nil
 	}
 	// return with error if user is not found
-	return nil, http_error.Error(400, "user not found")
+	return nil, http_error.Error(404, "user not found")
+}
 
+func (server *UsermanagerServer) GetUser(ctx context.Context, input *pb.GetUserInput) (*pb.User, error) {
+	log.Printf("Received request for user id: %v", input.GetId())
+	return FetchUser(input.GetId())
+}
+
+func (server *UsermanagerServer) GetUsers(ctx context.Context, input *pb.GetUsersInput) (*pb.Users, error) {
+	log.Printf("Received request for user ids: %v", input.GetIds())
+	var users []*pb.User
+	// traverse through ids passed in request
+	// and fetch user details from in-memory DB
+	for _, id := range input.GetIds() {
+		user, http_error := FetchUser(id)
+		if http_error == nil {
+			users = append(users, user)
+		}
+	}
+	response := &pb.Users{Users: users}
+	return response, nil
 }
 
 func main() {
@@ -62,10 +80,10 @@ func main() {
 
 	// register usermanager service
 	pb.RegisterUsermanagerServiceServer(server, &UsermanagerServer{})
-	log.Printf("server listening at - %v", listener.Addr())
+	log.Printf("server listening at: %v", listener.Addr())
 
 	// log error, if any
 	if err := server.Serve(listener); err != nil {
-		log.Fatalf("failed to connect to server: %v", err)
+		log.Fatalf("failed to serve with error: %v", err)
 	}
 }

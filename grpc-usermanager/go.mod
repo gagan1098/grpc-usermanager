@@ -3,8 +3,7 @@ module github.com/grpc-usermanager
 go 1.20
 
 require (
-	github.com/google/uuid v1.4.0
-	google.golang.org/grpc v1.59.0
+	google.golang.org/grpc v1.33.0-dev
 	google.golang.org/protobuf v1.31.0
 )
 

@@ -22,7 +22,8 @@ const _ = grpc.SupportPackageIsVersion7
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type UsermanagerServiceClient interface {
-	GetUser(ctx context.Context, in *Input, opts ...grpc.CallOption) (*Output, error)
+	GetUser(ctx context.Context, in *GetUserInput, opts ...grpc.CallOption) (*User, error)
+	GetUsers(ctx context.Context, in *GetUsersInput, opts ...grpc.CallOption) (*Users, error)
 }
 
 type usermanagerServiceClient struct {
@@ -33,9 +34,18 @@ func NewUsermanagerServiceClient(cc grpc.ClientConnInterface) UsermanagerService
 	return &usermanagerServiceClient{cc}
 }
 
-func (c *usermanagerServiceClient) GetUser(ctx context.Context, in *Input, opts ...grpc.CallOption) (*Output, error) {
-	out := new(Output)
+func (c *usermanagerServiceClient) GetUser(ctx context.Context, in *GetUserInput, opts ...grpc.CallOption) (*User, error) {
+	out := new(User)
 	err := c.cc.Invoke(ctx, "/proto.UsermanagerService/GetUser", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *usermanagerServiceClient) GetUsers(ctx context.Context, in *GetUsersInput, opts ...grpc.CallOption) (*Users, error) {
+	out := new(Users)
+	err := c.cc.Invoke(ctx, "/proto.UsermanagerService/GetUsers", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -46,7 +56,8 @@ func (c *usermanagerServiceClient) GetUser(ctx context.Context, in *Input, opts 
 // All implementations must embed UnimplementedUsermanagerServiceServer
 // for forward compatibility
 type UsermanagerServiceServer interface {
-	GetUser(context.Context, *Input) (*Output, error)
+	GetUser(context.Context, *GetUserInput) (*User, error)
+	GetUsers(context.Context, *GetUsersInput) (*Users, error)
 	mustEmbedUnimplementedUsermanagerServiceServer()
 }
 
@@ -54,8 +65,11 @@ type UsermanagerServiceServer interface {
 type UnimplementedUsermanagerServiceServer struct {
 }
 
-func (UnimplementedUsermanagerServiceServer) GetUser(context.Context, *Input) (*Output, error) {
+func (UnimplementedUsermanagerServiceServer) GetUser(context.Context, *GetUserInput) (*User, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetUser not implemented")
+}
+func (UnimplementedUsermanagerServiceServer) GetUsers(context.Context, *GetUsersInput) (*Users, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetUsers not implemented")
 }
 func (UnimplementedUsermanagerServiceServer) mustEmbedUnimplementedUsermanagerServiceServer() {}
 
@@ -71,7 +85,7 @@ func RegisterUsermanagerServiceServer(s grpc.ServiceRegistrar, srv UsermanagerSe
 }
 
 func _UsermanagerService_GetUser_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(Input)
+	in := new(GetUserInput)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -83,7 +97,25 @@ func _UsermanagerService_GetUser_Handler(srv interface{}, ctx context.Context, d
 		FullMethod: "/proto.UsermanagerService/GetUser",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(UsermanagerServiceServer).GetUser(ctx, req.(*Input))
+		return srv.(UsermanagerServiceServer).GetUser(ctx, req.(*GetUserInput))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _UsermanagerService_GetUsers_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetUsersInput)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(UsermanagerServiceServer).GetUsers(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/proto.UsermanagerService/GetUsers",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(UsermanagerServiceServer).GetUsers(ctx, req.(*GetUsersInput))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -98,6 +130,10 @@ var UsermanagerService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetUser",
 			Handler:    _UsermanagerService_GetUser_Handler,
+		},
+		{
+			MethodName: "GetUsers",
+			Handler:    _UsermanagerService_GetUsers_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

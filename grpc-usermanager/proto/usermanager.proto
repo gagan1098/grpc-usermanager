@@ -4,11 +4,11 @@ package proto;
 
 option go_package = "github.com/grpc-usermanager";
 
-message Input {
+message GetUserInput {
     int32   id = 1;
 }
 
-message Output {
+message User {
     int32   id = 1;
     string  fname = 2;
     string  city = 3;
@@ -17,6 +17,15 @@ message Output {
     bool    Married = 6;
 }
 
+message GetUsersInput {
+    repeated int32   ids = 1;
+}
+
+message Users {
+    repeated User users = 1;
+}
+
 service UsermanagerService {
-    rpc GetUser(Input) returns (Output) {}
+    rpc GetUser(GetUserInput) returns (User) {}
+    rpc GetUsers(GetUsersInput) returns (Users) {}
 }
